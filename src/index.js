@@ -1,3 +1,7 @@
+//Config
+const dotenv = require('dotenv');
+dotenv.config();
+
 //Importar dependencias
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 const CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
@@ -9,8 +13,8 @@ global.fetch = require('node-fetch');
 
 //Informacion del grupo de usuario
 const poolData = {
-    UserPoolId: "eu-west-1_zjWkXyJsJ",
-    ClientId: "5tcge501mvu8c1p4nribffh4t1"
+    UserPoolId: process.env.USERPOOLID, //id del grupo
+    ClientId: process.env.CLIENTID //id del cliente
 }
 const pool_region = 'eu-west-1';
 //Iniciar grupo de usuarios
@@ -24,10 +28,10 @@ function RegisterUser(){
     //attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"birthdate",Value:"1991-06-21"}));
     //attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"address",Value:"CMB"}));
     attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"email",Value:"raulgf_02@hotmail.com"}));
-    attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"phone_number",Value:"959118844"}));
-    attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"custom:scope",Value:"admin"}));
+    attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"phone_number",Value:"+51959118844"}));
+    //attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({Name:"custom:scope",Value:"admin"}));
 
-    userPool.signUp('raulgf_02@hotmail.com', 'SamplePassword123', attributeList, null, function(err, result){
+    userPool.signUp('raulgf_02@hotmail.com', 'SamplePassword_123', attributeList, null, function(err, result){
         if (err) {
             console.log(err);
             return;
@@ -36,3 +40,29 @@ function RegisterUser(){
         console.log('user name is ' + cognitoUser.getUsername());
     });
 }
+
+function Login() {
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+        Username : 'raulgf_02@hotmail.com',
+        Password : 'SamplePassword_123',
+    });
+
+    var userData = {
+        Username : 'raulgf_02@hotmail.com',
+        Pool : userPool
+    };
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+            console.log('access token + ' + result.getAccessToken().getJwtToken());
+            console.log('id token + ' + result.getIdToken().getJwtToken());
+            console.log('refresh token + ' + result.getRefreshToken().getToken());
+        },
+        onFailure: function(err) {
+            console.log(err);
+        },
+
+    });
+}
+//RegisterUser();
+//Login()
